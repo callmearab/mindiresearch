@@ -466,6 +466,11 @@ html {
   gap: 1.5rem;
   padding: 2rem 0;
   border-bottom: 1px solid var(--rule);
+  transition: border-color 0.2s ease, padding-inline-start 0.25s ease;
+}
+a.author-row:hover {
+  border-color: var(--cyan);
+  padding-inline-start: 0.75rem;
 }
 .author-avatar {
   flex-shrink: 0;
@@ -510,6 +515,159 @@ html {
   color: var(--ink);
   opacity: 0.75;
   max-width: 42rem;
+}
+
+/* ==========================================================================
+   Team grid — one card per member, three per row on desktop
+   ========================================================================== */
+.team-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2.5rem 2.25rem;
+}
+.team-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  max-width: 320px;
+  padding: 2.25rem 1.75rem;
+  border: 1px solid var(--rule);
+  background: var(--paper);
+  transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+.team-card:hover {
+  border-color: var(--cyan);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(14, 42, 82, 0.08);
+}
+.team-card:hover .link-arrow {
+  color: var(--cyan);
+  border-color: var(--cyan);
+  gap: 0.75rem;
+}
+.team-card-avatar {
+  flex-shrink: 0;
+  width: 6rem;
+  height: 6rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--manila);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.team-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.team-card-avatar.is-padded img {
+  width: 64%;
+  height: 64%;
+  object-fit: contain;
+}
+.team-card-excerpt {
+  margin-top: 1rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--ink);
+  opacity: 0.65;
+  max-width: 24rem;
+}
+.clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==========================================================================
+   Individual profile page
+   ========================================================================== */
+.profile-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.profile-avatar {
+  flex-shrink: 0;
+  width: 9rem;
+  height: 9rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule);
+  background: var(--manila);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-avatar.is-padded img {
+  width: 64%;
+  height: 64%;
+  object-fit: contain;
+}
+.profile-quote {
+  font-family: "Newsreader", serif;
+  font-size: 1.35rem;
+  line-height: 1.6;
+  color: var(--ink);
+  padding-inline-start: 1.25rem;
+  border-inline-start: 3px solid var(--cyan);
+  max-width: 42rem;
+}
+[dir="rtl"] .profile-quote {
+  font-family: "Vazirmatn", sans-serif;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.6;
+  transition: opacity 0.2s ease, color 0.2s ease;
+}
+.back-link:hover {
+  opacity: 1;
+  color: var(--cyan);
+}
+[dir="rtl"] .back-link {
+  letter-spacing: normal;
+  text-transform: none;
+}
+.social-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+}
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  padding: 0.55rem 1.1rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.social-link:hover {
+  border-color: var(--cyan);
+  color: var(--cyan);
 }
 
 /* ==========================================================================
@@ -594,6 +752,35 @@ html {
 }
 
 /* ==========================================================================
+   Footer credit line
+   ========================================================================== */
+.credit-line {
+  text-align: center;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.4);
+}
+.credit-line i {
+  color: var(--cyan);
+  margin: 0 0.2rem;
+}
+.credit-line a {
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: underline;
+  text-decoration-color: rgba(255, 255, 255, 0.28);
+  text-underline-offset: 3px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+.credit-line a:hover {
+  color: var(--cyan);
+  text-decoration-color: var(--cyan);
+}
+[dir="rtl"] .credit-line {
+  letter-spacing: normal;
+}
+
+/* ==========================================================================
    Back-to-top button
    ========================================================================== */
 .back-to-top {
@@ -674,6 +861,34 @@ html {
 [dir="rtl"] .field label {
   letter-spacing: normal;
   text-transform: none;
+}
+/* Several components set an explicit Latin font-family directly (not via
+   the Tailwind font-mono/font-body utility), so switching the Tailwind
+   config to Vazirmatn for Dari pages does not reach them on its own —
+   only Vazirmatn is loaded on these pages, so without this reset those
+   components fall back to the browser's generic system font instead.
+   The seal text is excluded on purpose: it is a fixed English design
+   mark, not translated content. */
+[dir="rtl"] .masthead-bar,
+[dir="rtl"] .lang-switch,
+[dir="rtl"] .btn-outline,
+[dir="rtl"] .btn-solid,
+[dir="rtl"] .kicker,
+[dir="rtl"] .index-line-label,
+[dir="rtl"] .catalog-card-row-top,
+[dir="rtl"] .catalog-card-row-bottom,
+[dir="rtl"] .catalog-field-label,
+[dir="rtl"] .memo-mark,
+[dir="rtl"] .toc-num,
+[dir="rtl"] .chip,
+[dir="rtl"] .author-role,
+[dir="rtl"] .field label,
+[dir="rtl"] .field input,
+[dir="rtl"] .field textarea,
+[dir="rtl"] .footer-heading,
+[dir="rtl"] .back-link,
+[dir="rtl"] .credit-line {
+  font-family: "Vazirmatn", sans-serif;
 }
 [dir="rtl"] em,
 [dir="rtl"] i.italic {
