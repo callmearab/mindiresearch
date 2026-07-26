@@ -68,6 +68,22 @@ vercel --prod
 
 No environment variables or configuration files are required.
 
+## Link previews (WhatsApp, Twitter, iMessage, etc.)
+
+Every page already has Open Graph and Twitter Card tags, plus a ready-made
+1200×630 share image at `assets/og-image.png`, so links posted anywhere show
+a title, description and image automatically.
+
+These tags point at:
+
+```
+https://mindiresearch.vercel.app
+```
+
+If this project ever moves to a different URL or a custom domain, update
+that same string across every `.html` file (`og:url`, `og:image`, and
+`twitter:image` all use it) with a single find-and-replace.
+
 ---
 
 # ویبسایت Mind i
@@ -114,3 +130,20 @@ No environment variables or configuration files are required.
    کنید و روی **Deploy** کلیک کنید (تنظیمات را به حالت پیش‌فرض بگذارید).
 
 هیچ متغیر محیطی یا فایل تنظیماتی اضافی لازم نیست.
+
+## پیش‌نمایش لینک (واتساپ، تویتر و غیره)
+
+هر صفحه از قبل تگ‌های Open Graph و Twitter Card دارد، به همراه یک تصویر
+آمادهٔ اشتراک‌گذاری (`assets/og-image.png`) — پس هر جا لینک سایت را
+بفرستید، عنوان، توضیح و عکس به صورت خودکار نمایش داده می‌شود.
+
+این تگ‌ها به این آدرس اشاره می‌کنند:
+
+```
+https://mindiresearch.vercel.app
+```
+
+اگر روزی این پروژه به آدرس یا دامین دیگری منتقل شد، همین رشته را در همهٔ
+فایل‌های `.html` جای‌گزین کنید (تگ‌های `og:url`، `og:image` و
+`twitter:image` همه از همین یک آدرس استفاده می‌کنند) — یک
+جست‌وجو-و-جایگزینی ساده کافی است.
