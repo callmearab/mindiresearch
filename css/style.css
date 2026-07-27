@@ -15,16 +15,94 @@
   --navy: #1B4B91;
   --cyan: #1D6FE0;
   --rule: #D3E3F7;
+  --ease-out: cubic-bezier(0.16, 0.8, 0.24, 1);
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html {
   scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
 }
 
 ::selection {
   background: var(--manila);
   color: var(--ink);
 }
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
+}
+
+/* ==========================================================================
+   Keyboard focus
+   A single, consistent focus ring for everyone navigating by keyboard.
+   :focus-visible keeps it from appearing on a plain mouse click, so it
+   never competes with hover states or the component-level focus
+   treatments defined further down (e.g. the contact form's underline).
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 3px;
+}
+
+/* ==========================================================================
+   Reading-progress ribbon — injected by main.js, sits above the masthead
+   ========================================================================== */
+.progress-ribbon {
+  position: fixed;
+  top: 0;
+  inset-inline-start: 0;
+  height: 2.5px;
+  width: 100%;
+  background: var(--cyan);
+  transform-origin: left;
+  transform: scaleX(0);
+  z-index: 60;
+  will-change: transform;
+}
+[dir="rtl"] .progress-ribbon {
+  transform-origin: right;
+}
+
+/* ==========================================================================
+   Scroll-reveal motion system
+   Elements carrying .reveal fade and rise into place the first time they
+   cross into the viewport (see js/main.js). --reveal-i is set per element
+   by script, staggering siblings that reveal together. Falls back to fully
+   visible, un-animated content if JavaScript never runs or the visitor has
+   asked for reduced motion — the class is only ever a progressive
+   enhancement, never a requirement for reading the page.
+   ========================================================================== */
+.js .reveal {
+  opacity: 0;
+}
+.js .reveal.is-visible {
+  animation: reveal-in 0.7s var(--ease-out) both;
+  animation-delay: calc(min(var(--reveal-i, 0), 6) * 70ms);
+}
+@keyframes reveal-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal { opacity: 1; }
+  .js .reveal.is-visible { animation: none; }
+}
+/* Note: the entrance above is deliberately an *animation*, not a
+   transition. Several components that also carry .reveal (team cards,
+   author rows, program rows) already declare their own `transition` for
+   hover states on the same `transform`/`opacity`-adjacent properties;
+   using `animation` here keeps the one-time entrance and the ongoing
+   hover interactions from fighting over the same CSS cascade slot. */
 
 .skip-link {
   position: absolute;
@@ -60,10 +138,19 @@ html {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.header-shell.is-scrolled {
+  box-shadow: 0 8px 24px rgba(14, 42, 82, 0.08);
+  border-color: transparent;
 }
 
 .header-inner {
   height: 4.75rem;
+  transition: height 0.3s var(--ease-out);
+}
+.header-shell.is-scrolled .header-inner {
+  height: 4rem;
 }
 
 .nav-link {
@@ -119,7 +206,7 @@ html {
   overflow: hidden;
   background: var(--paper);
   border-top: 1px solid var(--rule);
-  transition: max-height 0.35s ease;
+  transition: max-height 0.35s var(--ease-out);
 }
 .mobile-menu.is-open {
   max-height: 30rem;
@@ -129,9 +216,36 @@ html {
   font-size: 1.05rem;
   color: var(--ink);
   border-bottom: 1px solid var(--rule);
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
+.mobile-menu.is-open .mobile-link,
+.mobile-menu.is-open .btn-outline {
+  opacity: 1;
+  transform: translateY(0);
+}
+.mobile-menu .btn-outline {
+  opacity: 0;
+  transform: translateY(-6px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.mobile-menu nav > *:nth-child(1) { transition-delay: 0.03s; }
+.mobile-menu nav > *:nth-child(2) { transition-delay: 0.06s; }
+.mobile-menu nav > *:nth-child(3) { transition-delay: 0.09s; }
+.mobile-menu nav > *:nth-child(4) { transition-delay: 0.12s; }
+.mobile-menu nav > *:nth-child(5) { transition-delay: 0.15s; }
+.mobile-menu nav > *:nth-child(6) { transition-delay: 0.18s; }
+.mobile-menu nav > *:nth-child(7) { transition-delay: 0.21s; }
+.mobile-menu nav > *:nth-child(8) { transition-delay: 0.24s; }
 .mobile-link.is-active {
   color: var(--cyan);
+}
+body.menu-open {
+  overflow: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .mobile-link, .mobile-menu .btn-outline { transition: opacity 0.2s ease; transform: none; }
 }
 
 /* ==========================================================================
@@ -147,11 +261,16 @@ html {
   color: var(--ink);
   border: 1px solid var(--ink);
   padding: 0.7rem 1.4rem;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease-out), box-shadow 0.2s ease;
 }
 .btn-outline:hover {
   background: var(--ink);
   color: var(--paper);
+  box-shadow: 0 6px 16px rgba(14, 42, 82, 0.16);
+}
+.btn-outline:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(14, 42, 82, 0.14);
 }
 .btn-solid {
   display: inline-flex;
@@ -164,11 +283,19 @@ html {
   background: var(--ink);
   border: 1px solid var(--ink);
   padding: 0.7rem 1.4rem;
-  transition: background 0.2s ease, border-color 0.2s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s var(--ease-out), box-shadow 0.2s ease;
 }
 .btn-solid:hover {
   background: var(--cyan);
   border-color: var(--cyan);
+  box-shadow: 0 6px 16px rgba(29, 111, 224, 0.25);
+}
+.btn-solid:active {
+  transform: scale(0.96);
+  box-shadow: 0 2px 6px rgba(29, 111, 224, 0.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-outline:active, .btn-solid:active { transform: none; }
 }
 
 .link-arrow {
@@ -247,6 +374,20 @@ html {
   transform: translateY(-4px);
   min-width: 1.5rem;
 }
+.js .reveal .index-line-dots {
+  transform-origin: left center;
+  transform: translateY(-4px) scaleX(0);
+  transition: transform 0.6s var(--ease-out) 0.15s;
+}
+.js .reveal.is-visible .index-line-dots {
+  transform: translateY(-4px) scaleX(1);
+}
+[dir="rtl"].js .reveal .index-line-dots {
+  transform-origin: right center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal .index-line-dots { transform: translateY(-4px) scaleX(1); transition: none; }
+}
 .index-line-value {
   color: var(--ink);
   font-weight: 500;
@@ -260,6 +401,25 @@ html {
   border: 1px solid var(--rule);
   padding: 1.75rem 1.75rem 1.5rem;
   position: relative;
+  transition: transform 0.4s var(--ease-out), box-shadow 0.4s var(--ease-out);
+}
+.catalog-card:hover {
+  transform: translateY(-4px) rotate(-0.6deg);
+  box-shadow: 0 22px 40px rgba(14, 42, 82, 0.1);
+}
+/* One-time "stamp" settle as the card first enters view — the signature
+   motion moment of the page, echoing the seal it frames. */
+.js .reveal.is-visible .catalog-card {
+  animation: catalog-settle 0.75s var(--ease-spring) both;
+}
+@keyframes catalog-settle {
+  0%   { transform: scale(0.93) rotate(-2.5deg); }
+  55%  { transform: scale(1.015) rotate(0.5deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal.is-visible .catalog-card { animation: none; }
+  .catalog-card:hover { transform: none; }
 }
 .catalog-card::before,
 .catalog-card::after {
@@ -300,6 +460,14 @@ html {
   inset: 0;
   width: 100%;
   height: 100%;
+  transform-origin: 50% 50%;
+  animation: seal-spin 46s linear infinite;
+}
+@keyframes seal-spin {
+  to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seal-svg { animation: none; }
 }
 .seal-ring-outer,
 .seal-ring-inner {
@@ -351,6 +519,20 @@ html {
   border-bottom: 1px dotted rgba(14, 42, 82, 0.3);
   transform: translateY(-4px);
 }
+.js .reveal .catalog-field-dots {
+  transform-origin: left center;
+  transform: translateY(-4px) scaleX(0);
+  transition: transform 0.6s var(--ease-out) 0.2s;
+}
+.js .reveal.is-visible .catalog-field-dots {
+  transform: translateY(-4px) scaleX(1);
+}
+[dir="rtl"].js .reveal .catalog-field-dots {
+  transform-origin: right center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .js .reveal .catalog-field-dots { transform: translateY(-4px) scaleX(1); transition: none; }
+}
 .catalog-field-value {
   font-weight: 500;
   color: var(--ink);
@@ -394,11 +576,13 @@ html {
   gap: 1.25rem;
   padding: 1.75rem 0;
   border-bottom: 1px solid var(--rule);
-  transition: padding-inline-start 0.25s ease, border-color 0.25s ease;
+  transition: padding-inline-start 0.3s var(--ease-out), border-color 0.3s ease, background 0.3s ease;
 }
 .toc-row:hover {
   padding-inline-start: 0.75rem;
+  padding-inline-end: 0.75rem;
   border-color: var(--cyan);
+  background: rgba(232, 241, 252, 0.45);
 }
 .toc-num {
   font-family: "IBM Plex Mono", monospace;
@@ -407,6 +591,10 @@ html {
   padding-top: 0.15rem;
   width: 1.8rem;
   flex-shrink: 0;
+  transition: transform 0.3s var(--ease-spring);
+}
+.toc-row:hover .toc-num {
+  transform: scale(1.15);
 }
 .toc-icon {
   color: var(--navy);
@@ -416,6 +604,11 @@ html {
   flex-shrink: 0;
   width: 1.25rem;
   text-align: center;
+  transition: opacity 0.3s ease, transform 0.3s var(--ease-spring);
+}
+.toc-row:hover .toc-icon {
+  opacity: 1;
+  transform: scale(1.1);
 }
 .toc-body {
   flex: 1;
@@ -488,6 +681,10 @@ a.author-row:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+a.author-row:hover .author-avatar img {
+  transform: scale(1.08);
 }
 .author-avatar-pad img {
   width: 68%;
@@ -564,6 +761,10 @@ a.author-row:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.5s var(--ease-out);
+}
+.team-card:hover .team-card-avatar img {
+  transform: scale(1.08);
 }
 .team-card-avatar.is-padded img {
   width: 64%;
@@ -618,15 +819,40 @@ a.author-row:hover {
 }
 .profile-quote {
   font-family: "Newsreader", serif;
-  font-size: 1.35rem;
-  line-height: 1.6;
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.7;
   color: var(--ink);
-  padding-inline-start: 1.25rem;
+  background: var(--manila);
   border-inline-start: 3px solid var(--cyan);
+  padding: 2rem 2.25rem;
   max-width: 42rem;
+  position: relative;
+}
+.profile-quote::before {
+  content: "\201C";
+  font-family: "Newsreader", serif;
+  font-style: normal;
+  position: absolute;
+  top: -0.25rem;
+  inset-inline-start: 1.5rem;
+  font-size: 3.5rem;
+  line-height: 1;
+  color: var(--cyan);
+  opacity: 0.3;
+}
+[dir="rtl"] .profile-quote::before {
+  content: "\201D";
 }
 [dir="rtl"] .profile-quote {
   font-family: "Vazirmatn", sans-serif;
+  font-style: normal;
+}
+.profile-intro {
+  font-size: 1.02rem;
+  line-height: 1.85;
+  color: var(--ink);
+  opacity: 0.85;
 }
 .back-link {
   display: inline-flex;
@@ -688,6 +914,9 @@ a.author-row:hover {
   opacity: 0.55;
   margin-bottom: 0.5rem;
 }
+.field {
+  position: relative;
+}
 .field input,
 .field textarea {
   width: 100%;
@@ -699,10 +928,46 @@ a.author-row:hover {
   background: transparent;
   transition: border-color 0.2s ease;
 }
+.field input:focus:not(:focus-visible),
+.field textarea:focus:not(:focus-visible) {
+  outline: none;
+  border-color: transparent;
+}
 .field input:focus,
 .field textarea:focus {
-  outline: none;
-  border-color: var(--cyan);
+  border-color: transparent;
+}
+.field::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 0;
+  height: 2px;
+  background: var(--cyan);
+  transition: left 0.3s var(--ease-out), right 0.3s var(--ease-out);
+}
+.field:focus-within::after {
+  left: 0;
+  right: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .field::after { transition: none; }
+}
+/* Invalid-on-submit state — set via JS on the wrapping .field, cleared
+   again the moment the visitor starts correcting it. */
+.field.has-error label {
+  color: #B4322A;
+  opacity: 0.85;
+}
+.field.has-error input,
+.field.has-error textarea {
+  border-color: rgba(180, 50, 42, 0.35);
+}
+.field.has-error::after {
+  left: 0;
+  right: 0;
+  background: #B4322A;
 }
 .form-note {
   font-size: 0.85rem;
@@ -797,18 +1062,22 @@ a.author-row:hover {
   justify-content: center;
   opacity: 0;
   visibility: hidden;
-  transform: translateY(10px);
-  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease, background 0.2s ease, color 0.2s ease;
+  transform: translateY(10px) scale(0.85);
+  transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring), visibility 0.3s ease, background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   z-index: 40;
 }
 .back-to-top.is-visible {
   opacity: 1;
   visibility: visible;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 .back-to-top:hover {
   background: var(--ink);
   color: var(--paper);
+  box-shadow: 0 8px 20px rgba(14, 42, 82, 0.18);
+}
+.back-to-top:active {
+  transform: scale(0.9);
 }
 /* ==========================================================================
    Page header band (used at the top of inner pages instead of the full hero)
@@ -824,11 +1093,6 @@ a.author-row:hover {
 .section-pad {
   padding-top: clamp(3.5rem, 7vw, 6rem);
   padding-bottom: clamp(3.5rem, 7vw, 6rem);
-}
-
-/* No animation on load — content is always shown immediately, as requested */
-.reveal {
-  opacity: 1;
 }
 
 /* ==========================================================================

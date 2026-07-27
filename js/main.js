@@ -17,28 +17,116 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ------------------------------------------------------------------
+     Reading-progress ribbon
+     A thin bar fixed to the very top of the viewport that fills as the
+     visitor reads down the page — a small nod to a bookmark ribbon
+     running through an archive volume. Purely decorative, so it is
+     built and inserted from script rather than living in every page.
+  ------------------------------------------------------------------ */
+  var progressRibbon = document.createElement('div');
+  progressRibbon.className = 'progress-ribbon';
+  progressRibbon.setAttribute('aria-hidden', 'true');
+  document.body.prepend(progressRibbon);
+
+  function onScrollProgress() {
+    var doc = document.documentElement;
+    var scrollable = doc.scrollHeight - doc.clientHeight;
+    var ratio = scrollable > 0 ? window.scrollY / scrollable : 0;
+    progressRibbon.style.transform = 'scaleX(' + Math.min(1, Math.max(0, ratio)) + ')';
+  }
+  document.addEventListener('scroll', onScrollProgress, { passive: true });
+  window.addEventListener('resize', onScrollProgress);
+  onScrollProgress();
+
+  /* ------------------------------------------------------------------
+     Sticky header — gains a shadow and compacts slightly once the page
+     has scrolled past the masthead strip.
+  ------------------------------------------------------------------ */
+  var siteHeader = document.getElementById('site-header');
+
+  function onScrollHeader() {
+    if (siteHeader) siteHeader.classList.toggle('is-scrolled', window.scrollY > 24);
+  }
+  document.addEventListener('scroll', onScrollHeader, { passive: true });
+  onScrollHeader();
+
+  /* ------------------------------------------------------------------
+     Scroll-reveal — elements marked .reveal fade and rise into place
+     the first time they enter the viewport. Siblings that share a
+     parent are staggered via a CSS custom property set here, rather
+     than in markup, so the effect stays in sync with however many
+     .reveal items a given page happens to place next to each other.
+  ------------------------------------------------------------------ */
+  var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+
+  if (revealEls.length && 'IntersectionObserver' in window) {
+    var staggerGroups = new Map();
+    revealEls.forEach(function (el) {
+      var parent = el.parentElement;
+      if (!staggerGroups.has(parent)) staggerGroups.set(parent, 0);
+      var i = staggerGroups.get(parent);
+      el.style.setProperty('--reveal-i', i);
+      staggerGroups.set(parent, i + 1);
+    });
+
+    var revealObserver = new IntersectionObserver(function (entries, observer) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+    revealEls.forEach(function (el) { revealObserver.observe(el); });
+  } else {
+    // No IntersectionObserver support — show everything immediately
+    // rather than leave content permanently hidden.
+    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  /* ------------------------------------------------------------------
      Mobile menu
   ------------------------------------------------------------------ */
   var menuToggle = document.getElementById('menu-toggle');
   var mobileMenu = document.getElementById('mobile-menu');
 
   if (menuToggle && mobileMenu) {
-    menuToggle.addEventListener('click', function () {
-      var isOpen = mobileMenu.classList.toggle('is-open');
-      menuToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    function setMenuIcon(isOpen) {
       var icon = menuToggle.querySelector('i');
-      if (icon) {
-        icon.className = isOpen ? 'fa-solid fa-xmark text-xl' : 'fa-solid fa-bars text-xl';
-      }
+      if (icon) icon.className = isOpen ? 'fa-solid fa-xmark text-xl' : 'fa-solid fa-bars text-xl';
+    }
+
+    function closeMenu(returnFocus) {
+      mobileMenu.classList.remove('is-open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('menu-open');
+      setMenuIcon(false);
+      if (returnFocus) menuToggle.focus();
+    }
+
+    function openMenu() {
+      mobileMenu.classList.add('is-open');
+      menuToggle.setAttribute('aria-expanded', 'true');
+      document.body.classList.add('menu-open');
+      setMenuIcon(true);
+      var firstLink = mobileMenu.querySelector('a');
+      if (firstLink) firstLink.focus();
+    }
+
+    menuToggle.addEventListener('click', function () {
+      var willOpen = !mobileMenu.classList.contains('is-open');
+      if (willOpen) { openMenu(); } else { closeMenu(false); }
     });
 
     mobileMenu.querySelectorAll('a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        mobileMenu.classList.remove('is-open');
-        menuToggle.setAttribute('aria-expanded', 'false');
-        var icon = menuToggle.querySelector('i');
-        if (icon) icon.className = 'fa-solid fa-bars text-xl';
-      });
+      link.addEventListener('click', function () { closeMenu(false); });
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && mobileMenu.classList.contains('is-open')) {
+        closeMenu(true);
+      }
     });
   }
 
@@ -82,6 +170,23 @@ document.addEventListener('DOMContentLoaded', function () {
       formNote.classList.toggle('is-error', !!isError);
     }
 
+    function fieldOf(input) {
+      return input.closest('.field');
+    }
+
+    function clearFieldError(input) {
+      var wrap = fieldOf(input);
+      if (wrap) wrap.classList.remove('has-error');
+      input.removeAttribute('aria-invalid');
+    }
+
+    var requiredInputs = contactForm.querySelectorAll('[required]');
+    requiredInputs.forEach(function (input) {
+      input.addEventListener('input', function () {
+        if (input.value.trim()) clearFieldError(input);
+      });
+    });
+
     contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -91,14 +196,21 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      var requiredFields = contactForm.querySelectorAll('[required]');
-      var allFilled = true;
-      requiredFields.forEach(function (field) {
-        if (!field.value.trim()) allFilled = false;
+      var firstInvalid = null;
+      requiredInputs.forEach(function (field) {
+        var wrap = fieldOf(field);
+        if (!field.value.trim()) {
+          if (wrap) wrap.classList.add('has-error');
+          field.setAttribute('aria-invalid', 'true');
+          if (!firstInvalid) firstInvalid = field;
+        } else {
+          clearFieldError(field);
+        }
       });
 
-      if (!allFilled) {
+      if (firstInvalid) {
         setNote(msgRequired, true);
+        firstInvalid.focus();
         return;
       }
 
