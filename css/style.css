@@ -669,7 +669,7 @@ a.author-row:hover {
   flex-shrink: 0;
   width: 3.5rem;
   height: 3.5rem;
-  border-radius: 999px;
+  border-radius: 0.85rem;
   border: 1px solid var(--rule);
   background: var(--manila);
   overflow: hidden;
@@ -749,7 +749,7 @@ a.author-row:hover .author-avatar img {
   flex-shrink: 0;
   width: 6rem;
   height: 6rem;
-  border-radius: 999px;
+  border-radius: 1.1rem;
   border: 1px solid var(--rule);
   background: var(--manila);
   overflow: hidden;
@@ -797,9 +797,9 @@ a.author-row:hover .author-avatar img {
 }
 .profile-avatar {
   flex-shrink: 0;
-  width: 9rem;
-  height: 9rem;
-  border-radius: 999px;
+  width: 11rem;
+  height: 11rem;
+  border-radius: 1.5rem;
   border: 1px solid var(--rule);
   background: var(--manila);
   overflow: hidden;
