@@ -59,30 +59,40 @@ document.addEventListener('DOMContentLoaded', function () {
   ------------------------------------------------------------------ */
   var revealEls = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
 
+  function showAllReveals() {
+    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
   if (revealEls.length && 'IntersectionObserver' in window) {
-    var staggerGroups = new Map();
-    revealEls.forEach(function (el) {
-      var parent = el.parentElement;
-      if (!staggerGroups.has(parent)) staggerGroups.set(parent, 0);
-      var i = staggerGroups.get(parent);
-      el.style.setProperty('--reveal-i', i);
-      staggerGroups.set(parent, i + 1);
-    });
-
-    var revealObserver = new IntersectionObserver(function (entries, observer) {
-      entries.forEach(function (entry) {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('is-visible');
-          observer.unobserve(entry.target);
-        }
+    try {
+      var staggerGroups = new Map();
+      revealEls.forEach(function (el) {
+        var parent = el.parentElement;
+        if (!staggerGroups.has(parent)) staggerGroups.set(parent, 0);
+        var i = staggerGroups.get(parent);
+        el.style.setProperty('--reveal-i', i);
+        staggerGroups.set(parent, i + 1);
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
-    revealEls.forEach(function (el) { revealObserver.observe(el); });
+      var revealObserver = new IntersectionObserver(function (entries, observer) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.01, rootMargin: '0px' });
+
+      revealEls.forEach(function (el) { revealObserver.observe(el); });
+    } catch (err) {
+      // Something about this page's setup broke the observer — never let
+      // that leave content permanently invisible.
+      showAllReveals();
+    }
   } else {
     // No IntersectionObserver support — show everything immediately
     // rather than leave content permanently hidden.
-    revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+    showAllReveals();
   }
 
   /* ------------------------------------------------------------------
@@ -248,5 +258,57 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
   }
+
+  /* ------------------------------------------------------------------
+     Photo carousels — any [data-carousel] block. Supports button clicks,
+     arrow keys when focused, and touch swipe. Slide order in the DOM is
+     always the logical/chronological order; direction of travel is
+     flipped for RTL pages so "next" still reads correctly.
+  ------------------------------------------------------------------ */
+  document.querySelectorAll('[data-carousel]').forEach(function (carousel) {
+    var track = carousel.querySelector('.carousel-track');
+    var slides = carousel.querySelectorAll('.carousel-slide');
+    var prevBtn = carousel.querySelector('.carousel-prev');
+    var nextBtn = carousel.querySelector('.carousel-next');
+    var counter = carousel.querySelector('.carousel-current');
+    var total = slides.length;
+    if (!track || !total) return;
+
+    var isRTL = document.documentElement.dir === 'rtl';
+    var sign = isRTL ? 1 : -1;
+    var index = 0;
+
+    function render() {
+      track.style.transform = 'translateX(' + (sign * index * 100) + '%)';
+      if (counter) counter.textContent = String(index + 1).padStart(2, '0');
+    }
+
+    function go(delta) {
+      index = (index + delta + total) % total;
+      render();
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { go(-1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { go(1); });
+
+    carousel.setAttribute('tabindex', '0');
+    carousel.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowLeft') go(isRTL ? 1 : -1);
+      if (e.key === 'ArrowRight') go(isRTL ? -1 : 1);
+    });
+
+    var touchStartX = null;
+    track.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    track.addEventListener('touchend', function (e) {
+      if (touchStartX === null) return;
+      var delta = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 40) go(delta < 0 ? 1 : -1);
+      touchStartX = null;
+    });
+
+    render();
+  });
 
 });

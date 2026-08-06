@@ -1151,7 +1151,14 @@ a.author-row:hover .author-avatar img {
 [dir="rtl"] .field textarea,
 [dir="rtl"] .footer-heading,
 [dir="rtl"] .back-link,
-[dir="rtl"] .credit-line {
+[dir="rtl"] .credit-line,
+[dir="rtl"] .carousel-counter {
+  font-family: "Vazirmatn", sans-serif;
+}
+/* Headings use the font-serif utility (Newsreader), which has no Persian
+   glyphs at all — without this, every RTL heading silently falls back to
+   the browser's generic serif instead of the page's actual typeface. */
+[dir="rtl"] .font-serif {
   font-family: "Vazirmatn", sans-serif;
 }
 [dir="rtl"] em,
@@ -1171,4 +1178,85 @@ a.author-row:hover .author-avatar img {
 }
 [dir="rtl"] body {
   line-height: 1.9;
+}
+
+/* ==========================================================================
+   Photo carousel — used on program-report pages to page through a full
+   event's photo set without stacking dozens of images in the flow.
+   ========================================================================== */
+.photo-carousel {
+  border: 1px solid var(--rule);
+  background: var(--manila);
+}
+.carousel-viewport {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+@media (min-width: 640px) {
+  .carousel-viewport { aspect-ratio: 16 / 10; }
+}
+.carousel-track {
+  display: flex;
+  height: 100%;
+  direction: ltr;
+  transition: transform 0.45s var(--ease-out);
+}
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track { transition: none; }
+}
+.carousel-slide {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.1rem;
+  border-top: 1px solid var(--rule);
+}
+.carousel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  border: 1px solid var(--ink);
+  background: var(--paper);
+  color: var(--ink);
+  transition: background 0.2s ease, color 0.2s ease, transform 0.15s var(--ease-out);
+}
+.carousel-btn:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.carousel-btn:active {
+  transform: scale(0.92);
+}
+[dir="rtl"] .carousel-btn i {
+  transform: scaleX(-1);
+}
+.carousel-counter {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  opacity: 0.65;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.carousel-counter .carousel-current {
+  opacity: 1;
+  font-weight: 500;
 }
